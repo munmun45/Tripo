@@ -37,7 +37,7 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   int _index = 0;
-  bool _loggedIn = false;
+  bool _loggedIn = true; // hide banner until auth check finishes
   bool _authChecked = false;
   String _userName = '';
   String _userPhone = '';
@@ -69,7 +69,6 @@ class _MainShellState extends State<MainShell> {
   }
 
   Future<void> _refreshAuth() async {
-    await AuthService.restoreSession();
     final loggedIn = await AuthService.isLoggedIn();
     final user = loggedIn ? await AuthService.currentUser() : null;
     if (!mounted) return;

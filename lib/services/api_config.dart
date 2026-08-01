@@ -13,7 +13,4 @@ class ApiConfig {
   static const notesList = '$baseUrl/notes/list.php';
   static const notesSave = '$baseUrl/notes/save.php';
   static const notesDelete = '$baseUrl/notes/delete.php';
-  static const adminStats = '$baseUrl/admin/stats.php';
-  static const adminUsers = '$baseUrl/admin/users.php';
-  static const adminUserDelete = '$baseUrl/admin/user_delete.php';
 }
