@@ -79,6 +79,16 @@ class ApiClient {
   }
 
   Map<String, dynamic> _decode(http.Response res) {
+    if (res.statusCode == 301 ||
+        res.statusCode == 302 ||
+        res.statusCode == 307 ||
+        res.statusCode == 308) {
+      throw ApiException(
+        'Server redirected (${res.statusCode}). Use HTTPS API URL.',
+        statusCode: res.statusCode,
+      );
+    }
+
     Map<String, dynamic> data;
     try {
       final decoded = jsonDecode(res.body);
@@ -86,6 +96,13 @@ class ApiClient {
           ? decoded
           : <String, dynamic>{'ok': false, 'message': 'Bad response'};
     } catch (_) {
+      final snippet = res.body.trim();
+      if (snippet.toLowerCase().contains('<html')) {
+        throw ApiException(
+          'API not found or blocked (${res.statusCode}). Check upload path.',
+          statusCode: res.statusCode,
+        );
+      }
       throw ApiException(
         'Server error (${res.statusCode})',
         statusCode: res.statusCode,

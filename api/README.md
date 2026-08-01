@@ -1,4 +1,4 @@
-# Tripo API (MySQLi) — deploy to `http://munmunmaharana.in/tripo/api`
+# Tripo API (MySQLi) — deploy to `https://munmunmaharana.in/tripo/api`
 
 ## Capacity
 Yes — this stack comfortably handles **~100 concurrent app users** for Tripo

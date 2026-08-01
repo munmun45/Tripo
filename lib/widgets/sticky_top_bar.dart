@@ -14,6 +14,8 @@ class StickyTopBar extends StatelessWidget {
   final VoidCallback? onSearchTap;
   final VoidCallback? onNotificationTap;
   final VoidCallback? onProfileTap;
+  /// First letter of logged-in user name (null/empty = generic icon).
+  final String? profileInitial;
   final List<Widget>? actions;
 
   const StickyTopBar({
@@ -27,6 +29,7 @@ class StickyTopBar extends StatelessWidget {
     this.onSearchTap,
     this.onNotificationTap,
     this.onProfileTap,
+    this.profileInitial,
     this.actions,
   });
 
@@ -94,7 +97,8 @@ class StickyTopBar extends StatelessWidget {
                     ),
                   if (onNotificationTap != null && onProfileTap != null)
                     const SizedBox(width: 6),
-                  if (onProfileTap != null) _profileBtn(onProfileTap!),
+                  if (onProfileTap != null)
+                    _profileBtn(onProfileTap!, profileInitial),
                 ],
               ),
             ],
@@ -104,7 +108,10 @@ class StickyTopBar extends StatelessWidget {
     );
   }
 
-  Widget _profileBtn(VoidCallback onTap) {
+  Widget _profileBtn(VoidCallback onTap, String? initial) {
+    final letter = (initial ?? '').trim();
+    final showLetter = letter.isNotEmpty;
+
     return IconButton(
       onPressed: onTap,
       padding: EdgeInsets.zero,
@@ -118,22 +125,35 @@ class StickyTopBar extends StatelessWidget {
       icon: Container(
         width: 28,
         height: 28,
+        alignment: Alignment.center,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: LinearGradient(
-            colors: [
-              Colors.white.withValues(alpha: 0.95),
-              AppColors.softSky,
-            ],
+            colors: showLetter
+                ? [AppColors.ocean, AppColors.aqua]
+                : [
+                    Colors.white.withValues(alpha: 0.95),
+                    AppColors.softSky,
+                  ],
           ),
           border: Border.all(color: Colors.white, width: 1.2),
           boxShadow: Glass.softShadow,
         ),
-        child: const Icon(
-          Icons.person_rounded,
-          size: 16,
-          color: AppColors.ocean,
-        ),
+        child: showLetter
+            ? Text(
+                letter[0].toUpperCase(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13,
+                  height: 1,
+                ),
+              )
+            : const Icon(
+                Icons.person_rounded,
+                size: 16,
+                color: AppColors.ocean,
+              ),
       ),
     );
   }

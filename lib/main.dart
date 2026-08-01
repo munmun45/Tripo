@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'screens/splash_screen.dart';
+import 'services/auth_service.dart';
 import 'theme/app_theme.dart';
 import 'utils/device_compat.dart';
 
 Future<void> main() async {
   await DeviceCompat.bootstrap();
+  // Restore login session before UI (survive app close / reopen).
+  await AuthService.restoreSession();
   // Catch framework errors so one bad frame never freezes the process.
   FlutterError.onError = (details) {
     FlutterError.presentError(details);

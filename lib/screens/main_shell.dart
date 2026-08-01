@@ -37,8 +37,10 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   int _index = 0;
-  bool _loggedIn = true; // hide banner until auth check finishes
+  bool _loggedIn = false;
   bool _authChecked = false;
+  String _userName = '';
+  String _userPhone = '';
 
   /// 0 Home · 1 Trips · 2 Map · 3 Split · 4 Docs · 5 Profile
   final List<Widget?> _pages = List<Widget?>.filled(6, null);
@@ -67,12 +69,21 @@ class _MainShellState extends State<MainShell> {
   }
 
   Future<void> _refreshAuth() async {
+    await AuthService.restoreSession();
     final loggedIn = await AuthService.isLoggedIn();
+    final user = loggedIn ? await AuthService.currentUser() : null;
     if (!mounted) return;
     setState(() {
       _loggedIn = loggedIn;
       _authChecked = true;
+      _userName = user?['name'] ?? '';
+      _userPhone = user?['phone'] ?? '';
     });
+  }
+
+  Future<void> _logout() async {
+    await AuthService.logout();
+    await _refreshAuth();
   }
 
   Widget _pageAt(int i) {
@@ -250,12 +261,16 @@ class _MainShellState extends State<MainShell> {
       extendBody: true,
       drawer: AppDrawer(
         currentIndex: _index == 5 ? 3 : (_index > 2 ? 0 : _index),
+        loggedIn: _loggedIn,
+        userName: _userName,
+        userPhone: _userPhone,
         onNavigate: (i) {
           // Drawer: 0 Home, 1 Packages, 2 Map, 3 Profile
           setState(() => _index = i == 3 ? 5 : i);
         },
         onWeather: _openWeather,
         onLogin: _openLogin,
+        onLogout: _logout,
         onTools: _openMore,
         onTool: _handleTool,
         onHelp: () {
@@ -270,6 +285,9 @@ class _MainShellState extends State<MainShell> {
             StickyTopBar(
               title: _titles[_index],
               subtitle: _subtitles[_index],
+              profileInitial: _loggedIn && _userName.trim().isNotEmpty
+                  ? _userName.trim()[0]
+                  : null,
               onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
               onNotificationTap: _openWeather,
               onSearchTap: () => _openSearch(),

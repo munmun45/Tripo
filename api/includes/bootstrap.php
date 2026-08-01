@@ -87,7 +87,7 @@ function require_user(): array
         json_fail('Missing auth token', 401);
     }
 
-    $sql = 'SELECT u.id, u.name, u.email, u.phone, t.token, t.expires_at
+    $sql = 'SELECT u.id, u.name, u.email, u.phone, u.is_admin, t.token, t.expires_at
             FROM api_tokens t
             INNER JOIN users u ON u.id = t.user_id
             WHERE t.token = ? LIMIT 1';
@@ -109,8 +109,18 @@ function require_user(): array
         'name' => $row['name'],
         'email' => $row['email'],
         'phone' => $row['phone'],
+        'is_admin' => (int) ($row['is_admin'] ?? 0) === 1,
         'token' => $row['token'],
     ];
+}
+
+function require_admin(): array
+{
+    $user = require_user();
+    if (empty($user['is_admin'])) {
+        json_fail('Admin access required', 403);
+    }
+    return $user;
 }
 
 function issue_token(int $userId): string
@@ -135,5 +145,6 @@ function user_public(array $u): array
         'name' => $u['name'],
         'email' => $u['email'],
         'phone' => $u['phone'] ?? null,
+        'is_admin' => !empty($u['is_admin']) && ((int) $u['is_admin'] === 1 || $u['is_admin'] === true),
     ];
 }

@@ -13,13 +13,27 @@ if (strlen($phone) < 10 || $password === '') {
     json_fail('Phone and password required');
 }
 
-$stmt = db()->prepare(
-    'SELECT id, name, email, phone, password_hash FROM users WHERE phone = ? LIMIT 1'
-);
-$stmt->bind_param('s', $phone);
-$stmt->execute();
-$user = $stmt->get_result()->fetch_assoc();
-$stmt->close();
+try {
+    $stmt = db()->prepare(
+        'SELECT id, name, email, phone, is_admin, password_hash FROM users WHERE phone = ? LIMIT 1'
+    );
+    $stmt->bind_param('s', $phone);
+    $stmt->execute();
+    $user = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+} catch (Throwable $e) {
+    // Older DB without is_admin column
+    $stmt = db()->prepare(
+        'SELECT id, name, email, phone, password_hash FROM users WHERE phone = ? LIMIT 1'
+    );
+    $stmt->bind_param('s', $phone);
+    $stmt->execute();
+    $user = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    if ($user) {
+        $user['is_admin'] = 0;
+    }
+}
 
 if (!$user || !password_verify($password, $user['password_hash'])) {
     json_fail('Invalid phone or password', 401);

@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email` VARCHAR(190) DEFAULT NULL,
   `password_hash` VARCHAR(255) NOT NULL,
   `phone` VARCHAR(20) NOT NULL,
+  `is_admin` TINYINT(1) NOT NULL DEFAULT 0,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -91,24 +92,27 @@ CREATE TABLE IF NOT EXISTS `todo_items` (
 
 -- ---------- demo seed users ----------
 -- password set via tools/seed_passwords.php → Tripo@123
-INSERT INTO `users` (`name`, `email`, `password_hash`, `phone`) VALUES
+INSERT INTO `users` (`name`, `email`, `password_hash`, `phone`, `is_admin`) VALUES
 (
   'Demo Traveler',
   '9999999999@tripo.phone',
   '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
-  '9999999999'
+  '9999999999',
+  0
 ),
 (
   'Munmun Maharana',
   '9876543210@tripo.phone',
   '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
-  '9876543210'
+  '9876543210',
+  1
 )
-ON DUPLICATE KEY UPDATE `name` = VALUES(`name`);
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `is_admin` = VALUES(`is_admin`);
 
 -- After import, open once:
---   http://munmunmaharana.in/tripo/api/tools/seed_passwords.php
--- Demo login: phone 9999999999 / password Tripo@123
+--   https://munmunmaharana.in/tripo/api/tools/seed_passwords.php
+-- Demo user: 9999999999 / Tripo@123
+-- Admin user: 9876543210 / Tripo@123
 -- Then DELETE tools/seed_passwords.php from the server.
 
 INSERT INTO `saved_packages` (`user_id`, `package_id`)
