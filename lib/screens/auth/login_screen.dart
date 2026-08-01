@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../services/auth_service.dart';
+import '../../services/saved_packages_store.dart';
 import '../../theme/app_radii.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/page_scaffold.dart';
@@ -13,32 +15,34 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _email = TextEditingController();
+  final _phone = TextEditingController();
   final _password = TextEditingController();
   bool _obscure = true;
   bool _loading = false;
 
   @override
   void dispose() {
-    _email.dispose();
+    _phone.dispose();
     _password.dispose();
     super.dispose();
   }
 
   Future<void> _login() async {
     setState(() => _loading = true);
-    final ok = await AuthService.login(
-      email: _email.text,
+    final result = await AuthService.login(
+      phone: _phone.text,
       password: _password.text,
     );
     if (!mounted) return;
     setState(() => _loading = false);
-    if (ok) {
+    if (result.ok) {
+      await SavedPackagesStore.instance.syncFromServer();
+      if (!mounted) return;
       Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Enter email and password (demo — any values work)'),
+        SnackBar(
+          content: Text(result.message),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -59,7 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           const SizedBox(height: 6),
           const Text(
-            'Demo login — database will be connected later',
+            'Use your phone number & password',
             style: TextStyle(color: AppColors.slate),
           ),
           const SizedBox(height: 24),
@@ -73,11 +77,15 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               children: [
                 TextField(
-                  controller: _email,
-                  keyboardType: TextInputType.emailAddress,
+                  controller: _phone,
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(15),
+                  ],
                   decoration: const InputDecoration(
-                    labelText: 'Email',
-                    prefixIcon: Icon(Icons.mail_outline_rounded),
+                    labelText: 'Phone number',
+                    prefixIcon: Icon(Icons.phone_outlined),
                   ),
                 ),
                 const SizedBox(height: 12),

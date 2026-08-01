@@ -17,7 +17,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _loading = true;
   bool _loggedIn = false;
   String _name = '';
-  String _email = '';
+  String _phone = '';
 
   @override
   void initState() {
@@ -35,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _loggedIn = user != null;
         _name = user?['name'] ?? '';
-        _email = user?['email'] ?? '';
+        _phone = user?['phone'] ?? '';
         _loading = false;
       });
     } catch (_) {
@@ -100,7 +100,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _loggedIn ? _email : 'App is open without login',
+                        _loggedIn
+                            ? (_phone.isEmpty ? 'Signed in' : _phone)
+                            : 'App is open without login',
                         style: const TextStyle(color: AppColors.slate),
                       ),
                     ],
