@@ -16,6 +16,9 @@ json_ok([
         'GET  /notes/list.php',
         'POST /notes/save.php',
         'POST /notes/delete.php',
+        'GET  /admin/users.php',
+        'GET  /admin/packages.php',
+        'GET  /admin/stats.php',
     ],
     'capacity' => 'Designed for ~100 concurrent mobile users (PHP + MySQLi).',
 ]);

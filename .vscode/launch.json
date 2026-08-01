@@ -1,0 +1,30 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "tripo_admin (Chrome)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "tripo_admin",
+      "deviceId": "chrome",
+      "args": ["--web-port=5173"]
+    },
+    {
+      "name": "tripo_admin (Edge)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "tripo_admin",
+      "deviceId": "edge"
+    },
+    {
+      "name": "tripo_admin (Windows)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "cwd": "tripo_admin",
+      "deviceId": "windows"
+    }
+  ]
+}

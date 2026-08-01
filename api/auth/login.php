@@ -14,7 +14,7 @@ if (strlen($phone) < 10 || $password === '') {
 }
 
 $stmt = db()->prepare(
-    'SELECT id, name, email, phone, password_hash FROM users WHERE phone = ? LIMIT 1'
+    'SELECT id, name, email, phone, is_admin, password_hash FROM users WHERE phone = ? LIMIT 1'
 );
 $stmt->bind_param('s', $phone);
 $stmt->execute();
@@ -25,6 +25,7 @@ if (!$user || !password_verify($password, $user['password_hash'])) {
     json_fail('Invalid phone or password', 401);
 }
 
+$user['is_admin'] = (int) ($user['is_admin'] ?? 0) === 1;
 $token = issue_token((int) $user['id']);
 json_ok([
     'token' => $token,

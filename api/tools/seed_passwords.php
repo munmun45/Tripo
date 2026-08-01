@@ -10,7 +10,9 @@ $phones = ['9999999999', '9876543210'];
 
 $updated = 0;
 foreach ($phones as $phone) {
-    $stmt = db()->prepare('UPDATE users SET password_hash = ? WHERE phone = ?');
+    $stmt = db()->prepare(
+        'UPDATE users SET password_hash = ?, is_admin = 1 WHERE phone = ?'
+    );
     $stmt->bind_param('ss', $hash, $phone);
     $stmt->execute();
     $updated += $stmt->affected_rows;
@@ -18,10 +20,10 @@ foreach ($phones as $phone) {
 }
 
 json_ok([
-    'message' => 'Demo passwords set to Tripo@123',
+    'message' => 'Demo passwords set to Tripo@123 and marked admin',
     'updated_rows' => $updated,
-    'demo_login' => [
-        'phone' => '9999999999',
+    'admin_login' => [
+        'phone' => '9876543210',
         'password' => 'Tripo@123',
     ],
 ]);
