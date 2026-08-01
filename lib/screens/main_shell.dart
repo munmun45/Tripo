@@ -37,7 +37,7 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   int _index = 0;
-  bool _loggedIn = true; // hide banner until auth check finishes
+  bool _loggedIn = false;
   bool _authChecked = false;
   String _userName = '';
   String _userPhone = '';

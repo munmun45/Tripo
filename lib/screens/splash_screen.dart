@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
 import 'main_shell.dart';
 
@@ -28,10 +29,13 @@ class _SplashScreenState extends State<SplashScreen>
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
     _controller.forward();
-    Future.delayed(const Duration(milliseconds: 1400), _go);
+    _boot();
   }
 
-  void _go() {
+  Future<void> _boot() async {
+    // Restore login before opening shell so session survives app restart.
+    await AuthService.restoreSession();
+    await Future<void>.delayed(const Duration(milliseconds: 900));
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(

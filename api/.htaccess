@@ -1,3 +1,10 @@
 RewriteEngine On
-# Optional: block direct listing
 Options -Indexes
+
+# Pass Authorization header to PHP (LiteSpeed / Apache often strip it)
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+</IfModule>

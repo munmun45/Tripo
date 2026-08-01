@@ -46,7 +46,9 @@ class ApiClient {
       'Accept': 'application/json',
     };
     if (auth && _token != null && _token!.isNotEmpty) {
+      // Send both — some hosts strip Authorization.
       h['Authorization'] = 'Bearer $_token';
+      h['X-Api-Token'] = _token!;
     }
     return h;
   }
