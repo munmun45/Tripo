@@ -104,6 +104,8 @@ CREATE TABLE IF NOT EXISTS `travel_packages` (
   `reviews` INT UNSIGNED NOT NULL DEFAULT 0,
   `category` VARCHAR(60) NOT NULL DEFAULT '',
   `description` TEXT NULL,
+  `highlights` TEXT NULL,
+  `includes` TEXT NULL,
   `active` TINYINT(1) NOT NULL DEFAULT 1,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

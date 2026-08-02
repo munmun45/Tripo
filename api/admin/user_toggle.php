@@ -28,7 +28,7 @@ if ($id === (int) $admin['id']) {
 }
 
 $hasAdmin = column_exists('users', 'is_admin');
-$adminCol = $hasAdmin ? ', is_admin' : '';
+$adminCol = $hasAdmin ? ', is_admin' : ', 0 AS is_admin';
 $stmt = db()->prepare("SELECT id, is_active{$adminCol} FROM users WHERE id = ? LIMIT 1");
 $stmt->bind_param('i', $id);
 $stmt->execute();
@@ -37,6 +37,10 @@ $stmt->close();
 
 if (!$row) {
     json_fail('User not found', 404);
+}
+
+if ((int) ($row['is_admin'] ?? 0) === 1) {
+    json_fail('Admin accounts cannot be deactivated');
 }
 
 $next = (int) $row['is_active'] === 1 ? 0 : 1;

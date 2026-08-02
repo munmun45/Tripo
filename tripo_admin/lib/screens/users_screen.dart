@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../services/api_client.dart';
 import '../services/api_config.dart';
@@ -74,7 +73,8 @@ class _UsersScreenState extends State<UsersScreen> {
   }
 
   Future<void> _toggleActive(Map<String, dynamic> u) async {
-    final id = u['id'] as int?;
+    if (u['is_admin'] == true) return;
+    final id = (u['id'] as num?)?.toInt();
     if (id == null || _toggling.contains(id)) return;
     setState(() => _toggling.add(id));
     try {
@@ -112,16 +112,8 @@ class _UsersScreenState extends State<UsersScreen> {
     }
   }
 
-  String _daysLabel(int days) {
-    if (days <= 1) return '1 day';
-    return '$days days';
-  }
-
   @override
   Widget build(BuildContext context) {
-    final df = DateFormat('dd MMM yyyy');
-    final wide = MediaQuery.sizeOf(context).width >= 820;
-
     return RefreshIndicator(
       color: AdminTheme.ocean,
       onRefresh: _load,
@@ -219,259 +211,214 @@ class _UsersScreenState extends State<UsersScreen> {
               child: Center(child: Text('No users found')),
             )
           else
-            ..._users.map((u) {
-              final name = '${u['name'] ?? ''}';
-              final phone = '${u['phone'] ?? ''}';
-              final admin = u['is_admin'] == true;
-              final active = u['is_active'] != false;
-              final days = (u['days_on_app'] as num?)?.toInt() ?? 0;
-              final id = (u['id'] as num?)?.toInt();
-              DateTime? created;
-              try {
-                created = DateTime.parse('${u['created_at']}');
-              } catch (_) {}
-              final joinText =
-                  created == null ? '—' : df.format(created.toLocal());
-
-              return GlassPanel(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-                radius: 18,
-                child: wide
-                    ? Row(
+            GlassPanel(
+              padding: EdgeInsets.zero,
+              radius: 20,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final tableMin = constraints.maxWidth < 700 ? 700.0 : constraints.maxWidth;
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minWidth: tableMin),
+                      child: Table(
+                        defaultVerticalAlignment:
+                            TableCellVerticalAlignment.middle,
+                        columnWidths: const {
+                          0: FixedColumnWidth(64),
+                          1: FlexColumnWidth(2.4),
+                          2: FlexColumnWidth(1.6),
+                          3: FlexColumnWidth(1.2),
+                          4: FlexColumnWidth(1.6),
+                        },
                         children: [
-                          _Avatar(name: name, active: active),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            flex: 3,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Flexible(
-                                      child: Text(
-                                        name,
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 15,
-                                        ),
-                                      ),
-                                    ),
-                                    if (admin) ...[
-                                      const SizedBox(width: 8),
-                                      const _Pill(
-                                        label: 'Admin',
-                                        color: AdminTheme.ocean,
-                                      ),
-                                    ],
-                                  ],
-                                ),
-                                const SizedBox(height: 3),
-                                Text(
-                                  phone,
-                                  style: TextStyle(
-                                    color: AdminTheme.slate
-                                        .withValues(alpha: 0.95),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: _InfoCol(
-                              label: 'Join date',
-                              value: joinText,
-                              icon: Icons.event_rounded,
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: _InfoCol(
-                              label: 'On app',
-                              value: _daysLabel(days),
-                              icon: Icons.timelapse_rounded,
-                            ),
-                          ),
-                          _StatusToggle(
-                            active: active,
-                            loading: id != null && _toggling.contains(id),
-                            onChanged: () => _toggleActive(u),
-                          ),
-                        ],
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              _Avatar(name: name, active: active),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      name,
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: 15,
-                                      ),
-                                    ),
-                                    Text(
-                                      phone,
-                                      style: TextStyle(
-                                        color: AdminTheme.slate
-                                            .withValues(alpha: 0.95),
-                                      ),
-                                    ),
-                                  ],
+                          TableRow(
+                            decoration: BoxDecoration(
+                              color: AdminTheme.ocean.withValues(alpha: 0.08),
+                              border: Border(
+                                bottom: BorderSide(
+                                  color: AdminTheme.glassStroke
+                                      .withValues(alpha: 0.9),
                                 ),
                               ),
-                              if (admin)
-                                const _Pill(
-                                  label: 'Admin',
-                                  color: AdminTheme.ocean,
-                                ),
+                            ),
+                            children: const [
+                              _Th('ID'),
+                              _Th('User'),
+                              _Th('Phone'),
+                              _Th('Role'),
+                              _Th('Status'),
                             ],
                           ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _InfoCol(
-                                  label: 'Join date',
-                                  value: joinText,
-                                  icon: Icons.event_rounded,
-                                ),
+                          for (var i = 0; i < _users.length; i++)
+                            _userRow(
+                              u: _users[i],
+                              striped: i.isOdd,
+                              toggling: _toggling.contains(
+                                (_users[i]['id'] as num?)?.toInt(),
                               ),
-                              Expanded(
-                                child: _InfoCol(
-                                  label: 'On app',
-                                  value: _daysLabel(days),
-                                  icon: Icons.timelapse_rounded,
-                                ),
-                              ),
-                              _StatusToggle(
-                                active: active,
-                                loading: id != null && _toggling.contains(id),
-                                onChanged: () => _toggleActive(u),
-                              ),
-                            ],
-                          ),
+                              onToggle: () => _toggleActive(_users[i]),
+                            ),
                         ],
                       ),
-              );
-            }),
+                    ),
+                  );
+                },
+              ),
+            ),
         ],
       ),
     );
   }
 }
 
-class _Avatar extends StatelessWidget {
-  final String name;
-  final bool active;
+TableRow _userRow({
+  required Map<String, dynamic> u,
+  required bool striped,
+  required bool toggling,
+  required VoidCallback onToggle,
+}) {
+  final name = '${u['name'] ?? ''}';
+  final phone = '${u['phone'] ?? ''}';
+  final admin = u['is_admin'] == true;
+  final active = u['is_active'] != false;
+  final id = (u['id'] as num?)?.toInt() ?? 0;
 
-  const _Avatar({required this.name, required this.active});
+  return TableRow(
+    decoration: BoxDecoration(
+      color: striped ? Colors.white.withValues(alpha: 0.18) : Colors.transparent,
+      border: Border(
+        bottom: BorderSide(
+          color: AdminTheme.glassStroke.withValues(alpha: 0.55),
+        ),
+      ),
+    ),
+    children: [
+      _Td(
+        child: Text(
+          '#$id',
+          style: const TextStyle(
+            fontWeight: FontWeight.w800,
+            color: AdminTheme.slate,
+          ),
+        ),
+      ),
+      _Td(
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 16,
+              backgroundColor: (active ? AdminTheme.ocean : AdminTheme.slate)
+                  .withValues(alpha: 0.16),
+              child: Text(
+                name.isNotEmpty ? name[0].toUpperCase() : '?',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  color: active ? AdminTheme.ocean : AdminTheme.slate,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Flexible(
+              child: Text(
+                name,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  color: AdminTheme.ink,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      _Td(
+        child: Text(
+          phone,
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: AdminTheme.slate.withValues(alpha: 0.98),
+          ),
+        ),
+      ),
+      _Td(
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: _Pill(
+            label: admin ? 'Admin' : 'User',
+            color: admin ? AdminTheme.ocean : AdminTheme.slate,
+          ),
+        ),
+      ),
+      _Td(
+        child: admin
+            ? const Text(
+                '—',
+                style: TextStyle(
+                  color: AdminTheme.slate,
+                  fontWeight: FontWeight.w700,
+                ),
+              )
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _Pill(
+                    label: active ? 'Active' : 'Deactive',
+                    color: active ? AdminTheme.teal : AdminTheme.rose,
+                  ),
+                  const SizedBox(width: 8),
+                  if (toggling)
+                    const SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  else
+                    Switch.adaptive(
+                      value: active,
+                      activeThumbColor: Colors.white,
+                      activeTrackColor: AdminTheme.teal,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      onChanged: (_) => onToggle(),
+                    ),
+                ],
+              ),
+      ),
+    ],
+  );
+}
+
+class _Th extends StatelessWidget {
+  final String text;
+  const _Th(this.text);
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      backgroundColor: (active ? AdminTheme.ocean : AdminTheme.slate)
-          .withValues(alpha: 0.16),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Text(
-        name.isNotEmpty ? name[0].toUpperCase() : '?',
-        style: TextStyle(
-          color: active ? AdminTheme.ocean : AdminTheme.slate,
+        text,
+        style: const TextStyle(
           fontWeight: FontWeight.w900,
+          fontSize: 12,
+          letterSpacing: 0.3,
+          color: AdminTheme.ink,
         ),
       ),
     );
   }
 }
 
-class _InfoCol extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-
-  const _InfoCol({
-    required this.label,
-    required this.value,
-    required this.icon,
-  });
+class _Td extends StatelessWidget {
+  final Widget child;
+  const _Td({required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: AdminTheme.slate),
-        const SizedBox(width: 6),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  color: AdminTheme.slate.withValues(alpha: 0.9),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  color: AdminTheme.ink,
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _StatusToggle extends StatelessWidget {
-  final bool active;
-  final bool loading;
-  final VoidCallback onChanged;
-
-  const _StatusToggle({
-    required this.active,
-    required this.loading,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        _Pill(
-          label: active ? 'Active' : 'Deactive',
-          color: active ? AdminTheme.teal : AdminTheme.rose,
-        ),
-        const SizedBox(height: 4),
-        if (loading)
-          const SizedBox(
-            width: 22,
-            height: 22,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
-        else
-          Switch.adaptive(
-            value: active,
-            activeThumbColor: Colors.white,
-            activeTrackColor: AdminTheme.teal,
-            onChanged: (_) => onChanged(),
-          ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: child,
     );
   }
 }

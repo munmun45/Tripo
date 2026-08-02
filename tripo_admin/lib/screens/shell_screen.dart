@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 import '../services/admin_auth.dart';
 import '../theme/admin_theme.dart';
 import '../widgets/glass.dart';
+import 'cities_screen.dart';
+import 'countries_screen.dart';
 import 'dashboard_screen.dart';
 import 'login_screen.dart';
 import 'packages_screen.dart';
+import 'states_screen.dart';
 import 'users_screen.dart';
 
 class ShellScreen extends StatefulWidget {
@@ -17,6 +20,7 @@ class ShellScreen extends StatefulWidget {
 
 class _ShellScreenState extends State<ShellScreen> {
   int _index = 0;
+  int _refreshTick = 0;
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   Future<void> _logout() async {
@@ -30,6 +34,10 @@ class _ShellScreenState extends State<ShellScreen> {
   void _go(int i) {
     setState(() => _index = i);
     Navigator.of(context).maybePop();
+  }
+
+  void _refresh() {
+    setState(() => _refreshTick++);
   }
 
   Widget _sidebar({required bool compactDrawer}) {
@@ -88,28 +96,54 @@ class _ShellScreenState extends State<ShellScreen> {
                 ],
               ),
             ),
-          GlassNavTile(
-            icon: Icons.dashboard_outlined,
-            selectedIcon: Icons.dashboard_rounded,
-            label: 'Dashboard',
-            selected: _index == 0,
-            onTap: () => _go(0),
+          Expanded(
+            child: ListView(
+              children: [
+                GlassNavTile(
+                  icon: Icons.dashboard_outlined,
+                  selectedIcon: Icons.dashboard_rounded,
+                  label: 'Dashboard',
+                  selected: _index == 0,
+                  onTap: () => _go(0),
+                ),
+                GlassNavTile(
+                  icon: Icons.people_outline_rounded,
+                  selectedIcon: Icons.people_rounded,
+                  label: 'Users',
+                  selected: _index == 1,
+                  onTap: () => _go(1),
+                ),
+                GlassNavTile(
+                  icon: Icons.public_outlined,
+                  selectedIcon: Icons.public_rounded,
+                  label: 'Countries',
+                  selected: _index == 2,
+                  onTap: () => _go(2),
+                ),
+                GlassNavTile(
+                  icon: Icons.map_outlined,
+                  selectedIcon: Icons.map_rounded,
+                  label: 'States',
+                  selected: _index == 3,
+                  onTap: () => _go(3),
+                ),
+                GlassNavTile(
+                  icon: Icons.location_city_outlined,
+                  selectedIcon: Icons.location_city_rounded,
+                  label: 'Cities',
+                  selected: _index == 4,
+                  onTap: () => _go(4),
+                ),
+                GlassNavTile(
+                  icon: Icons.luggage_outlined,
+                  selectedIcon: Icons.luggage_rounded,
+                  label: 'Packages',
+                  selected: _index == 5,
+                  onTap: () => _go(5),
+                ),
+              ],
+            ),
           ),
-          GlassNavTile(
-            icon: Icons.people_outline_rounded,
-            selectedIcon: Icons.people_rounded,
-            label: 'Users',
-            selected: _index == 1,
-            onTap: () => _go(1),
-          ),
-          GlassNavTile(
-            icon: Icons.luggage_outlined,
-            selectedIcon: Icons.luggage_rounded,
-            label: 'Packages',
-            selected: _index == 2,
-            onTap: () => _go(2),
-          ),
-          const Spacer(),
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
             child: Text(
@@ -137,12 +171,22 @@ class _ShellScreenState extends State<ShellScreen> {
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= 980;
-    final pages = const [
-      DashboardScreen(),
-      UsersScreen(),
-      PackagesScreen(),
+    final pages = [
+      DashboardScreen(key: ValueKey('dash-$_refreshTick')),
+      UsersScreen(key: ValueKey('users-$_refreshTick')),
+      CountriesScreen(key: ValueKey('countries-$_refreshTick')),
+      StatesScreen(key: ValueKey('states-$_refreshTick')),
+      CitiesScreen(key: ValueKey('cities-$_refreshTick')),
+      PackagesScreen(key: ValueKey('pkgs-$_refreshTick')),
     ];
-    final titles = ['Dashboard', 'Users', 'Packages'];
+    final titles = [
+      'Dashboard',
+      'Users',
+      'Countries',
+      'States',
+      'Cities',
+      'Packages',
+    ];
 
     return GlassBackground(
       child: Scaffold(
@@ -190,13 +234,6 @@ class _ShellScreenState extends State<ShellScreen> {
                           gradient: const LinearGradient(
                             colors: [AdminTheme.ocean, AdminTheme.teal],
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AdminTheme.ocean.withValues(alpha: 0.35),
-                              blurRadius: 12,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
                         ),
                         child: const Icon(
                           Icons.travel_explore_rounded,
@@ -215,7 +252,6 @@ class _ShellScreenState extends State<ShellScreen> {
                                 fontWeight: FontWeight.w900,
                                 fontSize: 17,
                                 color: AdminTheme.ink,
-                                letterSpacing: -0.2,
                               ),
                             ),
                             Text(
@@ -228,6 +264,12 @@ class _ShellScreenState extends State<ShellScreen> {
                             ),
                           ],
                         ),
+                      ),
+                      IconButton(
+                        tooltip: 'Refresh',
+                        onPressed: _refresh,
+                        icon: const Icon(Icons.refresh_rounded),
+                        color: AdminTheme.ink,
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -279,41 +321,33 @@ class _ShellScreenState extends State<ShellScreen> {
             : Padding(
                 padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
                 child: GlassPanel(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  padding: const EdgeInsets.symmetric(vertical: 4),
                   radius: 22,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: GlassNavTile(
-                          compact: true,
-                          icon: Icons.dashboard_outlined,
-                          selectedIcon: Icons.dashboard_rounded,
-                          label: 'Dashboard',
-                          selected: _index == 0,
-                          onTap: () => setState(() => _index = 0),
-                        ),
-                      ),
-                      Expanded(
-                        child: GlassNavTile(
-                          compact: true,
-                          icon: Icons.people_outline_rounded,
-                          selectedIcon: Icons.people_rounded,
-                          label: 'Users',
-                          selected: _index == 1,
-                          onTap: () => setState(() => _index = 1),
-                        ),
-                      ),
-                      Expanded(
-                        child: GlassNavTile(
-                          compact: true,
-                          icon: Icons.luggage_outlined,
-                          selectedIcon: Icons.luggage_rounded,
-                          label: 'Packages',
-                          selected: _index == 2,
-                          onTap: () => setState(() => _index = 2),
-                        ),
-                      ),
-                    ],
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (final item in [
+                          (0, Icons.dashboard_outlined, Icons.dashboard_rounded, 'Home'),
+                          (1, Icons.people_outline_rounded, Icons.people_rounded, 'Users'),
+                          (2, Icons.public_outlined, Icons.public_rounded, 'Country'),
+                          (3, Icons.map_outlined, Icons.map_rounded, 'State'),
+                          (4, Icons.location_city_outlined, Icons.location_city_rounded, 'City'),
+                          (5, Icons.luggage_outlined, Icons.luggage_rounded, 'Package'),
+                        ])
+                          SizedBox(
+                            width: 88,
+                            child: GlassNavTile(
+                              compact: true,
+                              icon: item.$2,
+                              selectedIcon: item.$3,
+                              label: item.$4,
+                              selected: _index == item.$1,
+                              onTap: () => setState(() => _index = item.$1),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
