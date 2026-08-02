@@ -77,12 +77,15 @@ class ApiClient {
           ? decoded
           : <String, dynamic>{'ok': false, 'message': 'Bad response'};
     } catch (_) {
-      throw ApiException('Server error (${res.statusCode})',
-          statusCode: res.statusCode);
+      final snippet = res.body.trim();
+      final hint = snippet.isEmpty
+          ? 'Server error (${res.statusCode})'
+          : 'Server error (${res.statusCode}): ${snippet.length > 120 ? '${snippet.substring(0, 120)}…' : snippet}';
+      throw ApiException(hint, statusCode: res.statusCode);
     }
     if (data['ok'] != true) {
       throw ApiException(
-        (data['message'] as String?) ?? 'Request failed',
+        (data['message'] as String?) ?? 'Request failed (${res.statusCode})',
         statusCode: res.statusCode,
       );
     }

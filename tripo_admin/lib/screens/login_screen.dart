@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../services/admin_auth.dart';
 import '../theme/admin_theme.dart';
+import '../widgets/glass.dart';
 import 'shell_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -35,7 +36,11 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _loading = false);
     if (err != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(err), behavior: SnackBarBehavior.floating),
+        SnackBar(
+          content: Text(err),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AdminTheme.ink,
+        ),
       );
       return;
     }
@@ -46,37 +51,65 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 420),
-          child: Card(
-            margin: const EdgeInsets.all(24),
-            elevation: 0,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-              side: const BorderSide(color: AdminTheme.border),
-            ),
-            child: Padding(
+    return GlassBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 440),
+            child: GlassPanel(
+              margin: const EdgeInsets.all(24),
               padding: const EdgeInsets.all(28),
+              radius: 28,
+              blur: 22,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      width: 54,
+                      height: 54,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18),
+                        gradient: const LinearGradient(
+                          colors: [AdminTheme.ocean, AdminTheme.teal],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AdminTheme.ocean.withValues(alpha: 0.35),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.travel_explore_rounded,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
                   const Text(
                     'Tripo Admin',
                     style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w900,
                       color: AdminTheme.ink,
+                      letterSpacing: -0.5,
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Sign in with admin phone & password',
-                    style: TextStyle(color: AdminTheme.slate),
+                  Text(
+                    'Premium glass console for users, activity & packages',
+                    style: TextStyle(
+                      color: AdminTheme.slate.withValues(alpha: 0.95),
+                      height: 1.4,
+                    ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 26),
                   TextField(
                     controller: _phone,
                     keyboardType: TextInputType.phone,
@@ -107,23 +140,48 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 22),
-                  FilledButton(
-                    onPressed: _loading ? null : _submit,
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AdminTheme.ocean,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                  const SizedBox(height: 24),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: const LinearGradient(
+                        colors: [AdminTheme.ocean, AdminTheme.teal],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AdminTheme.ocean.withValues(alpha: 0.3),
+                          blurRadius: 16,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                    child: _loading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
+                    child: FilledButton(
+                      onPressed: _loading ? null : _submit,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: _loading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Enter dashboard',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 15,
+                              ),
                             ),
-                          )
-                        : const Text('Sign in'),
+                    ),
                   ),
                 ],
               ),

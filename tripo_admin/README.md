@@ -9,12 +9,12 @@ Non-admin accounts cannot sign in.
 
 ## Setup (server)
 
-1. Upload latest `api/` (especially `includes/bootstrap.php`, `auth/login.php`, `admin/*`, `sql/migrate_admin.sql`).
-2. In phpMyAdmin, run `api/sql/migrate_admin.sql`  
-   - If `is_admin` already exists, skip that `ALTER` and run the rest.
-3. Open once: `https://munmunmaharana.in/tripo/api/tools/seed_passwords.php`  
-   - Sets password `Tripo@123` and `is_admin = 1` for demo phones.  
-   - Then **delete** `seed_passwords.php` from the server.
+1. Upload latest `api/` (especially `includes/bootstrap.php`, `auth/login.php`, `admin/*`, `tools/ensure_admin_schema.php`).
+2. Open once in browser:  
+   `https://munmunmaharana.in/tripo/api/tools/ensure_admin_schema.php`  
+   - Creates `is_admin`, `travel_packages`, seeds city packages, marks demo admins.  
+   - Then **delete** that file from the server.
+3. (Optional) Open `tools/seed_passwords.php` once to reset password to `Tripo@123`, then delete it.
 
 ## Run locally
 

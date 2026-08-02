@@ -1,6 +1,7 @@
 -- Admin panel migration — run in phpMyAdmin after tripo.sql
 -- If `is_admin` already exists, skip the ALTER and run the rest.
-USE `tripo_db`;
+-- Live DB name may be u337172093_tripo — change USE if needed.
+USE `u337172093_tripo`;
 
 -- Admin flag on users (skip if column already exists — error #1060)
 ALTER TABLE `users`

@@ -6,6 +6,8 @@ class ApiConfig {
   static const me = '$baseUrl/auth/me.php';
   static const logout = '$baseUrl/auth/logout.php';
   static const users = '$baseUrl/admin/users.php';
+  static const userToggle = '$baseUrl/admin/user_toggle.php';
   static const packages = '$baseUrl/admin/packages.php';
   static const stats = '$baseUrl/admin/stats.php';
+  static const dashboard = '$baseUrl/admin/dashboard.php';
 }

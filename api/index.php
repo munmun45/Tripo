@@ -19,6 +19,7 @@ json_ok([
         'GET  /admin/users.php',
         'GET  /admin/packages.php',
         'GET  /admin/stats.php',
+        'GET  /admin/dashboard.php',
     ],
     'capacity' => 'Designed for ~100 concurrent mobile users (PHP + MySQLi).',
 ]);
